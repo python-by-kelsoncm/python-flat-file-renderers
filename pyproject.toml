@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flat-file-renderers"
+version = "0.1.0"
+description = "Render tabular/nested datasets (list/dict/QuerySet-like) into xlsx, csv, tsv, json, html or parquet files, zipped, with zero required dependencies"
+readme = "README.md"
+license = { file = "LICENSE.md" }
+authors = [{ name = "Kelson da Costa Medeiros", email = "kelsoncm@gmail.com" }]
+keywords = ["export", "xlsx", "csv", "tsv", "json", "html", "parquet", "renderer", "flatten"]
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = []
+
+[project.optional-dependencies]
+xlsx = ["openpyxl>=3.1"]
+parquet = ["pyarrow>=15"]
+all = ["openpyxl>=3.1", "pyarrow>=15"]
+dev = [
+    "openpyxl>=3.1",
+    "pyarrow>=15",
+    "pre-commit>=4.6.0",
+    "black>=26.3.1",
+    "ruff>=0.15.11",
+    "doc8>=2.0.0",
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+    "pytest-coverage-gate>=1.0.3",
+]
+
+[project.urls]
+Homepage = "https://github.com/python-by-kelsoncm/python-flat-file-renderers"
+"Bug Tracker" = "https://github.com/python-by-kelsoncm/python-flat-file-renderers/issues"
+Download = "https://github.com/python-by-kelsoncm/python-flat-file-renderers/releases/"
+Docs = "https://python-by-kelsoncm.github.io/python-flat-file-renderers/"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["flat_file_renderers*"]
+
+[tool.coverage.run]
+source = ["flat_file_renderers"]
+omit = ["tests/*", "sandbox/*"]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+
+[tool.ruff]
+line-length = 120
+force-exclude = true
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "S"]
+
+[tool.black]
+line-length = 120
