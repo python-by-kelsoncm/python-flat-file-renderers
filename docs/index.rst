@@ -80,6 +80,10 @@ Nested data is flattened automatically (``contacts.1.phone``, ``contacts.2.phone
     zip_path = renderer.render({"dataset": {"Students": [...], "Courses": [...]}})
     # zip_path -> Path to a .zip containing one .xlsx with two sheets
 
+Runnable examples for every renderer are available in the
+`sandbox/ <https://github.com/python-by-kelsoncm/python-flat-file-renderers/tree/main/sandbox>`_
+directory of the repository.
+
 Next steps
 ----------
 

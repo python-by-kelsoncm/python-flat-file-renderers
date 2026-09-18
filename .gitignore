@@ -107,3 +107,7 @@ local.properties
 
 # Virtualenv
 .venv/
+
+# Sandbox generated files
+sandbox/output/*
+!sandbox/output/.gitkeep
