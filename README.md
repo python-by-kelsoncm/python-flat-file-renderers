@@ -55,6 +55,8 @@ for Renderer in (CsvRenderer, TsvRenderer, JsonRenderer, HtmlRenderer, XlsxRende
     zip_path = Renderer({}).render({"dataset": rows})
 ```
 
+Runnable examples for every renderer live in [`sandbox/`](sandbox/).
+
 ## Modules
 
 * `flat_file_renderers.base` - `BaseRenderer`, `ZipFileEntry`
