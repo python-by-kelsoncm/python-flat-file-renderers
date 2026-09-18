@@ -29,44 +29,55 @@ def _serialize_item(item):
 
 class JsonRenderer(BaseRenderer):
     """
-    Renders data as JSON.
+    Renders data as JSON Lines (a.k.a. NDJSON): one compact JSON object per line.
+
+    The same layout used by the OpenSearch/Elasticsearch bulk API. Consumers can read the file
+    line by line instead of loading it whole, and the renderer itself writes record by record
+    without materializing the dataset as a list.
     """
 
-    _extension = "json"
+    _extension = "jsonl"
 
     def render(self, context: dict[str, any], *args, **kwargs) -> Path:
-        """Renders the data as JSON and writes it into a temporary zip file on disk.
+        """Renders the data as JSON Lines and writes it into a temporary zip file on disk.
+
+        Lists and QuerySet-like iterables produce one line per record. Any other dataset (a single
+        record, or a dict with a "rows" key) produces a single line.
 
         Returns:
-            Path: Path to the compressed (zip) file containing the .json file(s).
+            Path: Path to the compressed (zip) file containing the .jsonl file(s).
         """
         if "dataset" not in context:
             raise ValueError("context must contain a 'dataset' key")
 
         dataset = context.get("dataset")
 
-        def dump_json_file(data) -> Path:
-            if isinstance(data, list):
-                serial_data = [_serialize_item(item) for item in data]
-            elif hasattr(data, "model") and hasattr(data, "__iter__"):
-                serial_data = [_serialize_item(item) for item in data]
-            elif isinstance(data, dict):
-                serial_data = {
-                    k: [_serialize_item(i) for i in v] if isinstance(v, list) else _serialize_item(v)
-                    for k, v in data.items()
-                }
-            else:
-                serial_data = _serialize_item(data)
+        def dump_line(tmp, obj) -> None:
+            json.dump(obj, tmp, ensure_ascii=False, default=str, separators=(",", ":"))
+            tmp.write("\n")
 
-            with NamedTemporaryFile(delete=False, mode="w", encoding="utf-8", suffix=".json") as tmp:
-                json.dump(serial_data, tmp, ensure_ascii=False, default=str, indent=2)
+        def dump_json_file(data) -> Path:
+            with NamedTemporaryFile(delete=False, mode="w", encoding="utf-8", newline="\n", suffix=".jsonl") as tmp:
+                if isinstance(data, list) or (hasattr(data, "model") and hasattr(data, "__iter__")):
+                    for item in data:
+                        dump_line(tmp, _serialize_item(item))
+                elif isinstance(data, dict):
+                    dump_line(
+                        tmp,
+                        {
+                            k: [_serialize_item(i) for i in v] if isinstance(v, list) else _serialize_item(v)
+                            for k, v in data.items()
+                        },
+                    )
+                else:
+                    dump_line(tmp, _serialize_item(data))
                 return Path(tmp.name)
 
         if isinstance(dataset, dict) and "rows" not in dataset:
             entries = []
             for table_name, table_data in dataset.items():
                 slug_name = str(table_name).lower().replace(" ", "_").replace("í", "i").replace("á", "a")
-                alias = f"{slug_name}.json"
+                alias = f"{slug_name}.jsonl"
                 tmp_path = dump_json_file(table_data)
                 entries.append(ZipFileEntry(zipfilealias=alias, osfilepath=tmp_path))
             return self.write_zipfile(entries)

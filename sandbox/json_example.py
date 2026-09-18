@@ -1,4 +1,4 @@
-"""JsonRenderer: nested flattening and one file per dataset key.
+"""JsonRenderer: JSON Lines (one object per line), nested records and one file per dataset key.
 
 Run from the repository root:  python sandbox/json_example.py
 """

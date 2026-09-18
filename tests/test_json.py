@@ -5,6 +5,11 @@ from zipfile import ZipFile
 from flat_file_renderers.json import JsonRenderer
 
 
+def read_jsonl(raw) -> list:
+    text = raw.decode("utf-8") if isinstance(raw, bytes) else raw
+    return [json.loads(line) for line in text.splitlines()]
+
+
 class Record:
     """Plain object exercising the duck-typed __dict__ record path."""
 
@@ -40,8 +45,8 @@ class JsonRendererTestCase(unittest.TestCase):
             with ZipFile(zip_path) as zf:
                 names = zf.namelist()
                 self.assertEqual(len(names), 1)
-                self.assertTrue(names[0].endswith(".json"))
-                data = json.loads(zf.read(names[0]))
+                self.assertTrue(names[0].endswith(".jsonl"))
+                data = read_jsonl(zf.read(names[0]))
             self.assertEqual(data, context["dataset"])
         finally:
             zip_path.unlink(missing_ok=True)
@@ -57,9 +62,9 @@ class JsonRendererTestCase(unittest.TestCase):
         zip_path = renderer.render(context)
         try:
             with ZipFile(zip_path) as zf:
-                self.assertEqual(sorted(zf.namelist()), ["courses.json", "students.json"])
-                self.assertEqual(json.loads(zf.read("students.json")), [{"name": "Alice"}])
-                self.assertEqual(json.loads(zf.read("courses.json")), [{"title": "Python"}])
+                self.assertEqual(sorted(zf.namelist()), ["courses.jsonl", "students.jsonl"])
+                self.assertEqual(read_jsonl(zf.read("students.jsonl")), [{"name": "Alice"}])
+                self.assertEqual(read_jsonl(zf.read("courses.jsonl")), [{"title": "Python"}])
         finally:
             zip_path.unlink(missing_ok=True)
 
@@ -71,7 +76,7 @@ class JsonRendererTestCase(unittest.TestCase):
             with ZipFile(zip_path) as zf:
                 raw = zf.read(zf.namelist()[0]).decode("utf-8")
                 self.assertIn("José", raw)
-                data = json.loads(raw)
+                data = read_jsonl(raw)
             self.assertEqual(data, [{"name": "José"}])
         finally:
             zip_path.unlink(missing_ok=True)
@@ -82,7 +87,7 @@ class JsonRendererTestCase(unittest.TestCase):
         zip_path = renderer.render(context)
         try:
             with ZipFile(zip_path) as zf:
-                data = json.loads(zf.read(zf.namelist()[0]))
+                data = read_jsonl(zf.read(zf.namelist()[0]))
             self.assertEqual(data, [{"name": "Alice", "age": 30}])
         finally:
             zip_path.unlink(missing_ok=True)
@@ -93,7 +98,7 @@ class JsonRendererTestCase(unittest.TestCase):
         zip_path = renderer.render(context)
         try:
             with ZipFile(zip_path) as zf:
-                data = json.loads(zf.read(zf.namelist()[0]))
+                data = read_jsonl(zf.read(zf.namelist()[0]))
             self.assertEqual(data, [{"name": "Alice", "age": 30}])
         finally:
             zip_path.unlink(missing_ok=True)
@@ -113,7 +118,7 @@ class JsonRendererTestCase(unittest.TestCase):
         zip_path = renderer.render(context)
         try:
             with ZipFile(zip_path) as zf:
-                data = json.loads(zf.read(zf.namelist()[0]))
+                data = read_jsonl(zf.read(zf.namelist()[0]))
             self.assertEqual(data, [{"name": "Alice"}])
         finally:
             zip_path.unlink(missing_ok=True)
@@ -124,8 +129,8 @@ class JsonRendererTestCase(unittest.TestCase):
         zip_path = renderer.render(context)
         try:
             with ZipFile(zip_path) as zf:
-                data = json.loads(zf.read(zf.namelist()[0]))
-            self.assertEqual(data, {"rows": [{"name": "Alice"}], "cols": ["name"]})
+                data = read_jsonl(zf.read(zf.namelist()[0]))
+            self.assertEqual(data, [{"rows": [{"name": "Alice"}], "cols": ["name"]}])
         finally:
             zip_path.unlink(missing_ok=True)
 
@@ -135,8 +140,8 @@ class JsonRendererTestCase(unittest.TestCase):
         zip_path = renderer.render(context)
         try:
             with ZipFile(zip_path) as zf:
-                data = json.loads(zf.read(zf.namelist()[0]))
-            self.assertEqual(data, {"name": "Alice"})
+                data = read_jsonl(zf.read(zf.namelist()[0]))
+            self.assertEqual(data, [{"name": "Alice"}])
         finally:
             zip_path.unlink(missing_ok=True)
 
@@ -152,7 +157,27 @@ class JsonRendererTestCase(unittest.TestCase):
         zip_path = renderer.render(context)
         try:
             with ZipFile(zip_path) as zf:
-                data = json.loads(zf.read(zf.namelist()[0]))
+                data = read_jsonl(zf.read(zf.namelist()[0]))
             self.assertEqual(data, [{"value": "no-dict-as-string"}])
+        finally:
+            zip_path.unlink(missing_ok=True)
+
+    def test_one_compact_object_per_line(self):
+        renderer = JsonRenderer({})
+        context = {"dataset": [{"name": "Alice", "tags": ["a", "b"]}, {"name": "Bob", "tags": []}]}
+        zip_path = renderer.render(context)
+        try:
+            with ZipFile(zip_path) as zf:
+                raw = zf.read(zf.namelist()[0]).decode("utf-8")
+            self.assertEqual(raw, '{"name":"Alice","tags":["a","b"]}\n{"name":"Bob","tags":[]}\n')
+        finally:
+            zip_path.unlink(missing_ok=True)
+
+    def test_empty_list_produces_empty_file(self):
+        renderer = JsonRenderer({})
+        zip_path = renderer.render({"dataset": []})
+        try:
+            with ZipFile(zip_path) as zf:
+                self.assertEqual(zf.read(zf.namelist()[0]), b"")
         finally:
             zip_path.unlink(missing_ok=True)
