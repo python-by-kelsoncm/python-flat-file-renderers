@@ -63,7 +63,7 @@ Runnable examples for every renderer live in [`sandbox/`](sandbox/).
 * `flat_file_renderers.flat_dict_list_helper` - `FlatDictListHelper`, the flattening engine shared
   by every renderer
 * `flat_file_renderers.separated_value` - `CsvRenderer`, `TsvRenderer`
-* `flat_file_renderers.json` - `JsonRenderer`
+* `flat_file_renderers.json` - `JsonRenderer` (JSON Lines/NDJSON: one object per line, `.jsonl`)
 * `flat_file_renderers.html` - `HtmlRenderer`
 * `flat_file_renderers.xlsx` - `XlsxRenderer` (extra: `xlsx`)
 * `flat_file_renderers.parquet` - `ParquetRenderer` (extra: `parquet`)

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "flat-file-renderers"
-version = "0.2.0"
+version = "0.3.0"
 description = "Render tabular/nested datasets (list/dict/QuerySet-like) into xlsx, csv, tsv, json, html or parquet files, zipped, with zero required dependencies"
 readme = "README.md"
 license = { file = "LICENSE.md" }

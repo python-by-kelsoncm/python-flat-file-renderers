@@ -53,7 +53,7 @@ Modules
 * :doc:`flat_file_renderers.flat_dict_list_helper <flat_file_renderers.flat_dict_list_helper>` - flattens nested
   dicts/lists into tabular rows and columns
 * :doc:`flat_file_renderers.separated_value <flat_file_renderers.separated_value>` - ``CsvRenderer``, ``TsvRenderer``
-* :doc:`flat_file_renderers.json <flat_file_renderers.json>` - ``JsonRenderer``
+* :doc:`flat_file_renderers.json <flat_file_renderers.json>` - ``JsonRenderer`` (JSON Lines/NDJSON, ``.jsonl``)
 * :doc:`flat_file_renderers.html <flat_file_renderers.html>` - ``HtmlRenderer``
 * :doc:`flat_file_renderers.xlsx <flat_file_renderers.xlsx>` - ``XlsxRenderer`` (extra: ``xlsx``)
 * :doc:`flat_file_renderers.parquet <flat_file_renderers.parquet>` - ``ParquetRenderer`` (extra: ``parquet``)
